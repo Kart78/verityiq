@@ -1,0 +1,25 @@
+# SAMPLE CONFIGURATION ONLY - Tableau and Snowflake adapters are PLANNED (Phase 2).
+# Shows that the same KPI registry binds to another stack through mapping alone.
+# Connection tests will honestly report "planned / no adapter".
+id: sample-tableau-snowflake
+name: Customer Center (Sample config) - Tableau + Snowflake
+description: Configuration example; adapters not yet implemented.
+mode: LIVE
+sample: true
+bi:
+  platform: tableau
+  config: {server: "https://tableau.example.com", site: cc, pat_name: qa-bot, pat_secret: "${TABLEAU_PAT_SECRET}", workbook: Customer Center}
+data:
+  platform: snowflake
+  config: {account: xy12345, warehouse: QA_WH, database: CC, schema: CORE, user: QA_SVC, private_key: "${SNOWFLAKE_PRIVATE_KEY}"}
+kpi_file: config/kpis/customer_center_demo.yaml
+default_context: {label: Last 12 Months, relative_days: 365}
+mapping:
+  tables:
+    cases: {source: CC.CORE.SERVICE_CASES, model: Cases, primary_key: CASE_ID}
+    customers: {source: CC.CORE.CUSTOMERS, model: Customers, primary_key: CUSTOMER_ID}
+  joins: [{left: cases, right: customers, left_key: CUSTOMER_ID, right_key: CUSTOMER_ID}]
+  fields:
+    case_status: {table: cases, source: STATUS, model: "[Status]"}
+    case_date: {table: cases, source: CREATED_AT, model: "[Created At]", data_type: date}
+    state: {table: customers, source: STATE_CODE, model: "[State]"}

@@ -1,0 +1,17 @@
+# local data - never commit (database, uploaded projects, stored secrets)
+data/
+*.db
+secrets.json
+*.cache.duckdb
+.env
+.env.*
+# environments / build output
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+out/
+.vercel/
+node_modules/
+*.zip

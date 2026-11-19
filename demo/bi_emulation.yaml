@@ -1,0 +1,44 @@
+# DEMO ONLY - used by the "demo_bi" adapter.
+# Hand-written SQL equivalents of the sample DAX measures in demo/pbip, INCLUDING their defects
+# (e.g. FCR % divides by all cases). This stands in for the Power BI service so the demo can run
+# offline. It is deliberately independent of the KPI registry, which drives the expected values.
+database: demo/data/cc_sample.duckdb
+catalog_alias: demo_catalog
+
+columns:                       # model column -> SQL over aliases c (cases), cu (customers)
+  "Cases[Status]": c.status
+  "Cases[FirstContactResolved]": c.first_contact_resolved
+  "Cases[IsEscalated]": c.is_escalated
+  "Cases[CustomerID]": c.customer_id
+  "Cases[HandleTimeMin]": c.handle_time_min
+  "Cases[CSAT]": c.csat_score
+  "'Date'[Date]": c.created_date
+  "'Date'[Month]": "strftime(c.created_date, '%Y-%m')"
+  "Customers[State]": cu.state
+  "Customers[IsActive]": cu.is_active
+  "Customers[CustomerID]": cu.customer_id
+
+measures:
+  Total Cases:
+    from: demo_catalog.customer_center.cases c LEFT JOIN demo_catalog.customer_center.customers cu ON c.customer_id = cu.customer_id
+    expr: COUNT(*)
+  Total Customers:
+    from: demo_catalog.customer_center.customers cu
+    expr: COUNT(DISTINCT CASE WHEN cu.is_active THEN cu.customer_id END)
+  FCR %:                       # mirrors DAX defect: denominator = all cases
+    from: demo_catalog.customer_center.cases c LEFT JOIN demo_catalog.customer_center.customers cu ON c.customer_id = cu.customer_id
+    expr: 100.0 * COUNT(CASE WHEN c.status = 'Closed' AND c.first_contact_resolved THEN 1 END) / NULLIF(COUNT(*), 0)
+  Avg Handle Time (min):
+    from: demo_catalog.customer_center.cases c LEFT JOIN demo_catalog.customer_center.customers cu ON c.customer_id = cu.customer_id
+    expr: SUM(c.handle_time_min) / COUNT(c.handle_time_min)
+  CSAT Score:
+    from: demo_catalog.customer_center.cases c LEFT JOIN demo_catalog.customer_center.customers cu ON c.customer_id = cu.customer_id
+    expr: AVG(c.csat_score)
+  Open Cases:
+    from: demo_catalog.customer_center.cases c LEFT JOIN demo_catalog.customer_center.customers cu ON c.customer_id = cu.customer_id
+    expr: COUNT(CASE WHEN c.status = 'Open' THEN 1 END)
+  Escalation Rate:
+    error: "The value for 'Escalated Cases' cannot be determined. Either the column doesn't exist, or there is no current row for this column."
+
+refresh_history:
+  - {status: Completed, endTime: "see last seed run", refreshType: Scheduled}

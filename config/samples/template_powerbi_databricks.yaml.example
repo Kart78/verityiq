@@ -1,0 +1,29 @@
+# LIVE TEMPLATE - copy to <name>.yaml and fill in. Secrets as ${VAR} are resolved server-side
+# from environment variables / your secret manager; they are never sent to the browser.
+id: prod-cc
+name: Customer Center - PROD (Power BI + Databricks)
+mode: LIVE
+bi:
+  platform: powerbi
+  config:
+    tenant_id: "<azure-ad-tenant-guid>"
+    client_id: "<service-principal-app-id>"
+    client_secret: "${PBI_CLIENT_SECRET}"
+    workspace_id: "<workspace-guid>"
+    dataset_id: "<semantic-model-guid>"
+    pbip_path: /path/to/repo/CustomerCenter      # folder containing *.SemanticModel and *.Report
+data:
+  platform: databricks
+  config:
+    server_hostname: adb-1234567890123456.7.azuredatabricks.net
+    http_path: /sql/1.0/warehouses/<warehouse-id>
+    access_token: "${DATABRICKS_TOKEN}"           # or client_id/client_secret for OAuth M2M
+    catalog: main
+kpi_file: config/kpis/<your_kpis>.yaml
+default_context: {label: Last 12 Months, relative_days: 365}
+mapping:
+  tables:
+    cases: {source: main.customer_center.cases, model: Cases, primary_key: case_id}
+  joins: []
+  fields:
+    case_date: {table: cases, source: created_date, model: "'Date'[Date]", data_type: date}

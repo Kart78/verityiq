@@ -1,0 +1,23 @@
+fastapi>=0.110
+uvicorn>=0.29
+pydantic>=2.6
+PyYAML>=6.0
+requests>=2.31
+sqlglot>=25.0
+duckdb>=1.0
+pytest>=8.0
+python-multipart>=0.0.9
+openpyxl>=3.1
+# Live Databricks connections + secure secret storage:
+databricks-sql-connector>=3.0
+keyring>=24          # stores secrets typed in Settings in Windows Credential Manager / macOS Keychain
+truststore>=0.9      # trusts the company certificate store (corporate HTTPS inspection)
+pypdf>=4.0           # read PDF requirement documents for test scope
+rapidocr-onnxruntime; python_version < "3.14"   # offline OCR for dashboard screenshots (no Tesseract needed)
+Pillow
+# Live database connectors (Settings -> Data platform):
+snowflake-connector-python>=3.6   # Snowflake
+pyodbc>=5.0                       # SQL Server / Azure Synapse / Microsoft Fabric (needs Microsoft ODBC Driver 18)
+psycopg[binary]>=3.1              # PostgreSQL / Amazon Redshift
+pymysql>=1.1                      # MySQL / MariaDB
+oracledb>=2.0                     # Oracle (thin mode, no Oracle client needed)

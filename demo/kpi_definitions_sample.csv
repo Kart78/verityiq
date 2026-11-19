@@ -1,0 +1,8 @@
+KPI ID,KPI Name,Power BI Measure,Business Definition,Type (simple/ratio),Aggregation,Table,Column,Filters,Denominator Aggregation,Denominator Table,Denominator Column,Denominator Filters,Multiplier,Tolerance Type (exact/absolute/percent),Tolerance Value,Rounding (dp),Expected SQL (optional),Owner
+,Total Cases,Total Cases,"Count of all service cases created in the period, regardless of status.",simple,COUNT_ROWS,Cases,,,,,,,,exact,,,,Customer Ops
+,First Contact Resolution %,FCR %,"Closed cases resolved on first contact divided by all closed cases (open and cancelled excluded), x100.",ratio,COUNT_ROWS,Cases,,"Cases[Status] = ""Closed""; Cases[FirstContactResolved] = TRUE",COUNT_ROWS,Cases,,"Cases[Status] = ""Closed""",100,absolute,0.1,2,,Service Quality
+,Average Handle Time (min),Avg Handle Time (min),Mean handle time in minutes over cases where handle time is recorded.,simple,AVG,Cases,HandleTimeMin,,,,,,,absolute,0.01,2,,Service Quality
+,CSAT Score,CSAT Score,Average survey score (1-5) over surveyed cases.,simple,AVG,Cases,CSAT,,,,,,,absolute,0.01,2,,Service Quality
+,Open Cases,Open Cases,Number of cases currently in Open status.,simple,COUNT_ROWS,Cases,,"Cases[Status] = ""Open""",,,,,,exact,,,,Customer Ops
+,Escalation Rate %,Escalation Rate,"Escalated cases divided by all cases, x100.",ratio,COUNT_ROWS,Cases,,Cases[IsEscalated] = TRUE,COUNT_ROWS,Cases,,,100,absolute,0.1,2,,Service Quality
+,Active Customers,Total Customers,Number of distinct customers whose account is active.,simple,COUNT_DISTINCT,Customers,CustomerID,Customers[IsActive] = TRUE,,,,,,exact,,,,Customer Ops

@@ -1,0 +1,7 @@
+relationship 1a2b3c4d-0001
+	fromColumn: Cases.CustomerID
+	toColumn: Customers.CustomerID
+
+relationship 1a2b3c4d-0002
+	fromColumn: Cases.CreatedDate
+	toColumn: 'Date'.Date

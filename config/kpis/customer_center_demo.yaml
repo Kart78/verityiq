@@ -1,0 +1,113 @@
+# OPTIONAL DEMONSTRATION KPI REGISTRY - sample customer-service KPIs.
+# Logical field/table names are resolved through the environment mapping, so the same
+# definitions could be bound to any BI tool / data platform.
+kpis:
+  - id: KPI-001
+    name: Active Customers
+    business_definition: Number of distinct customers whose account is active.
+    owner: Customer Ops
+    kind: simple
+    unit: count
+    measure: {table: customers, aggregation: COUNT_DISTINCT, column: customer_id,
+              filters: [{field: is_active, op: "=", value: true}]}
+    grains: [state]
+    tolerance: {type: exact}
+    bi: {measure: Total Customers, model_table: Customers, expression_language: dax}
+    approval_status: APPROVED
+    approved_by: kpi-owner@example.com
+
+  - id: KPI-002
+    name: Total Cases
+    business_definition: Count of all service cases created in the period, regardless of status.
+    kind: simple
+    unit: count
+    measure: {table: cases, aggregation: COUNT_ROWS}
+    date_field: case_date
+    grains: [case_month, state]
+    tolerance: {type: exact}
+    bi: {measure: Total Cases, expression_language: dax}
+    approval_status: APPROVED
+    approved_by: kpi-owner@example.com
+
+  - id: KPI-003
+    name: First Contact Resolution %
+    business_definition: Closed cases resolved on first contact divided by all closed cases (cancelled and open cases excluded), x100.
+    kind: ratio
+    unit: percent
+    numerator: {table: cases, aggregation: COUNT_ROWS,
+                filters: [{field: case_status, op: "=", value: Closed}, {field: fcr_flag, op: "=", value: true}]}
+    denominator: {table: cases, aggregation: COUNT_ROWS, filters: [{field: case_status, op: "=", value: Closed}]}
+    multiplier: 100
+    date_field: case_date
+    grains: [state]
+    tolerance: {type: absolute, value: 0.1, rounding: 2}
+    bi: {measure: FCR %, expression_language: dax}
+    approval_status: APPROVED
+    approved_by: kpi-owner@example.com
+
+  - id: KPI-004
+    name: Average Handle Time (min)
+    business_definition: Mean handle time in minutes over cases where handle time is recorded.
+    kind: simple
+    unit: minutes
+    measure: {table: cases, aggregation: AVG, column: handle_time_min,
+              filters: [{field: handle_time_min, op: "is not null"}]}
+    date_field: case_date
+    tolerance: {type: absolute, value: 0.01, rounding: 2}
+    bi: {measure: Avg Handle Time (min), expression_language: dax}
+    approval_status: APPROVED
+
+  - id: KPI-005
+    name: CSAT Score
+    business_definition: Average survey score (1-5) over surveyed cases.
+    kind: simple
+    unit: score
+    measure: {table: cases, aggregation: AVG, column: csat_score,
+              filters: [{field: csat_score, op: "is not null"}]}
+    date_field: case_date
+    grains: [state]
+    tolerance: {type: absolute, value: 0.01, rounding: 2}
+    bi: {measure: CSAT Score, expression_language: dax}
+    approval_status: APPROVED
+
+  - id: KPI-006
+    name: Open Cases
+    business_definition: Number of cases currently in Open status.
+    kind: simple
+    unit: count
+    measure: {table: cases, aggregation: COUNT_ROWS, filters: [{field: case_status, op: "=", value: Open}]}
+    date_field: case_date
+    tolerance: {type: exact}
+    bi: {measure: Open Cases, expression_language: dax}
+    approval_status: APPROVED
+
+  - id: KPI-007
+    name: Customer Retention %
+    business_definition: "TBD - retention window (90 vs 180 days) not yet agreed with the business."
+    kind: ratio
+    unit: percent
+    bi: {measure: Customer Retention %, expression_language: dax}
+    approval_status: DRAFT
+    notes: Awaiting business sign-off; tests will report NOT VALIDATED.
+
+  - id: KPI-008
+    name: Case Data Freshness
+    business_definition: Latest case update in the source must be no older than 1 day.
+    kind: freshness
+    unit: days
+    freshness_field: updated_at
+    max_age_days: 1
+    approval_status: APPROVED
+
+  - id: KPI-009
+    name: Escalation Rate %
+    business_definition: Escalated cases divided by all cases, x100.
+    kind: ratio
+    unit: percent
+    numerator: {table: cases, aggregation: COUNT_ROWS, filters: [{field: escalated_flag, op: "=", value: true}]}
+    denominator: {table: cases, aggregation: COUNT_ROWS}
+    multiplier: 100
+    date_field: case_date
+    tolerance: {type: absolute, value: 0.1, rounding: 2}
+    bi: {measure: Escalation Rate, expression_language: dax}
+    approval_status: APPROVED

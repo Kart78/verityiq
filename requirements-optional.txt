@@ -1,0 +1,5 @@
+# Extra database drivers - install only the one you need:
+#   & .\.venv\Scripts\python.exe -m pip install -r requirements-optional.txt
+google-cloud-bigquery>=3.0    # Google BigQuery
+teradatasql>=20.0             # Teradata
+ibm_db>=3.2                   # IBM DB2 (beta)

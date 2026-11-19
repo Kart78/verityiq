@@ -1,0 +1,42 @@
+# OPTIONAL DEMO: Power BI + Databricks, running fully offline on sample data.
+# Copy config/environments/template_powerbi_databricks.yaml.example for a live environment.
+id: demo-pbi-dbx
+name: Customer Center (Demo) - Power BI + Databricks
+description: Sample PBIP model + sample data. Demo adapters - results are labelled DEMO.
+mode: DEMO
+sample: true
+bi:
+  platform: demo_bi
+  config:
+    pbip_path: demo/pbip
+    emulation: demo/bi_emulation.yaml
+data:
+  platform: demo_sql
+  config:
+    database: demo/data/cc_sample.duckdb
+    catalog_alias: demo_catalog
+kpi_file: config/kpis/customer_center_demo.yaml
+requirements_file: config/kpis/customer_center_requirements.yaml
+default_context:
+  label: Last 12 Months
+  relative_days: 365
+mapping:
+  tables:
+    cases: {source: demo_catalog.customer_center.cases, model: Cases, primary_key: case_id, freshness_column: updated_at}
+    customers: {source: demo_catalog.customer_center.customers, model: Customers, primary_key: customer_id}
+  joins:
+    - {left: cases, right: customers, left_key: customer_id, right_key: customer_id}
+  fields:
+    case_id: {table: cases, source: case_id, model: "Cases[CaseID]"}
+    case_customer_id: {table: cases, source: customer_id, model: "Cases[CustomerID]"}
+    customer_id: {table: customers, source: customer_id, model: "Customers[CustomerID]"}
+    case_status: {table: cases, source: status, model: "Cases[Status]"}
+    fcr_flag: {table: cases, source: first_contact_resolved, model: "Cases[FirstContactResolved]", data_type: boolean}
+    escalated_flag: {table: cases, source: is_escalated, model: "Cases[IsEscalated]", data_type: boolean}
+    handle_time_min: {table: cases, source: handle_time_min, model: "Cases[HandleTimeMin]"}
+    csat_score: {table: cases, source: csat_score, model: "Cases[CSAT]"}
+    case_date: {table: cases, source: created_date, model: "'Date'[Date]", data_type: date}
+    case_month: {table: cases, source_expr: "date_format({t}.created_date, 'yyyy-MM')", model: "'Date'[Month]"}
+    updated_at: {table: cases, source: updated_at}
+    state: {table: customers, source: state, model: "Customers[State]", sample_values: [TX]}
+    is_active: {table: customers, source: is_active, model: "Customers[IsActive]", data_type: boolean}

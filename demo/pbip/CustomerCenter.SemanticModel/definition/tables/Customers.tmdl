@@ -1,0 +1,25 @@
+table Customers
+	lineageTag: 6b1f0c1e-0002
+
+	measure 'Total Customers' = CALCULATE(DISTINCTCOUNT(Customers[CustomerID]), Customers[IsActive] = TRUE())
+		formatString: #,0
+
+	column CustomerID
+		dataType: string
+		sourceColumn: customer_id
+
+	column CustomerName
+		dataType: string
+		sourceColumn: customer_name
+
+	column State
+		dataType: string
+		sourceColumn: state
+
+	column IsActive
+		dataType: boolean
+		sourceColumn: is_active
+
+	partition Customers = m
+		mode: import
+		source = Databricks.Catalogs(Host, HttpPath){[Name="main"]}[Data]{[Name="customer_center"]}[Data]{[Name="customers"]}[Data]

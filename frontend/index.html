@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VerityIQ</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo"><i style="height:14px"></i><i style="height:24px"></i><i style="height:34px"></i></div>
+      <div class="brand-bi" id="brandBi">VerityIQ</div>
+      <h1 id="brandTag">Universal BI &amp; Data Quality Assurance</h1>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="ai-card" id="aiCard"></div>
+  </aside>
+  <main class="main">
+    <div class="topbar">
+      <span class="grid-ic" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      <h2 id="pageTitle">BI Testing Assistant</h2>
+      <select class="select" id="envSelect" aria-label="Environment"></select>
+      <span class="chip" id="ctxChip"></span>
+      <div class="avatar" id="avatar" title=""></div>
+    </div>
+    <div id="modeBanner"></div>
+    <div id="view"></div>
+  </main>
+</div>
+<div class="drawer-bg" id="drawerBg"></div>
+<div class="drawer" id="drawer"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>

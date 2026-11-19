@@ -1,0 +1,22 @@
+requirements:
+  - id: BR-01
+    title: Active customer base by state
+    description: Regional leaders need the number of active customers, sliceable by state.
+    kpi_ids: [KPI-001]
+  - id: BR-02
+    title: Case volume trend
+    description: Show monthly case volume for the last 12 months and allow filtering by state.
+    kpi_ids: [KPI-002, KPI-006]
+    visual_ids: [lineCasesByMonth, cardTotalCases]
+  - id: BR-03
+    title: Service quality
+    description: Track first-contact resolution, handle time, CSAT and escalations against targets.
+    kpi_ids: [KPI-003, KPI-004, KPI-005, KPI-009]
+  - id: BR-04
+    title: Retention
+    description: Measure customer retention (definition pending).
+    kpi_ids: [KPI-007]
+  - id: BR-05
+    title: Trustworthy data
+    description: Dashboard data must be no more than one day old.
+    kpi_ids: [KPI-008]

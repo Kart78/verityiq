@@ -1,0 +1,18 @@
+table Date
+	dataCategory: Time
+	lineageTag: 6b1f0c1e-0003
+
+	column Date
+		dataType: dateTime
+		isKey
+		sourceColumn: Date
+
+	column Month = FORMAT([Date], "yyyy-MM")
+		dataType: string
+
+	column Year = YEAR([Date])
+		dataType: int64
+
+	partition Date = calculated
+		mode: import
+		source = CALENDAR(DATE(2024, 1, 1), DATE(2026, 12, 31))

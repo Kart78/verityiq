@@ -1,0 +1,12 @@
+# Used by the Vercel deployment only (lean set - no ODBC drivers or OS credential vault there).
+# For a local install use: pip install -r requirements.txt  (see README)
+[project]
+name = "verityiq"
+version = "1.0.0"
+description = "VerityIQ - Universal BI & Data Quality Assurance"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.110", "pydantic>=2.6", "PyYAML>=6.0", "requests>=2.31", "sqlglot>=25.0", "duckdb>=1.0",
+  "python-multipart>=0.0.9", "openpyxl>=3.1", "pypdf>=4.0", "Pillow",
+  "databricks-sql-connector>=3.0", "snowflake-connector-python>=3.6", "psycopg[binary]>=3.1", "pymysql>=1.1", "oracledb>=2.0",
+]

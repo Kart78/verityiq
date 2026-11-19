@@ -1,0 +1,83 @@
+table Cases
+	lineageTag: 6b1f0c1e-0001
+
+	measure 'Total Cases' = COUNTROWS(Cases)
+		formatString: #,0
+		lineageTag: m-001
+
+	measure 'Closed Cases' = CALCULATE([Total Cases], Cases[Status] = "Closed")
+		formatString: #,0
+
+	/// First contact resolution as a percentage of resolved work
+	measure 'FCR %' =
+			DIVIDE(
+			    CALCULATE([Closed Cases], Cases[FirstContactResolved] = TRUE()),
+			    [Total Cases]
+			) * 100
+		formatString: 0.0
+
+	measure 'Avg Handle Time (min)' = SUM(Cases[HandleTimeMin]) / COUNT(Cases[HandleTimeMin])
+		formatString: 0.00
+
+	measure 'CSAT Score' = AVERAGE(Cases[CSAT])
+		formatString: 0.00
+
+	measure 'Open Cases' = CALCULATE(COUNTROWS(Cases), FILTER(Cases, Cases[Status] = "Open"))
+		formatString: #,0
+
+	measure 'Cases YoY %' = ```
+			VAR _ly = CALCULATE([Total Cases], SAMEPERIODLASTYEAR('Date'[Date]))
+			RETURN DIVIDE([Total Cases] - _ly, _ly)
+			```
+		formatString: 0.0%
+
+	measure 'Escalation Rate' = DIVIDE([Escalated Cases], [Total Cases]) * 100
+		formatString: 0.0
+
+	column CaseID
+		dataType: string
+		summarizeBy: none
+		sourceColumn: case_id
+
+	column CustomerID
+		dataType: string
+		summarizeBy: none
+		sourceColumn: customer_id
+
+	column Status
+		dataType: string
+		summarizeBy: none
+		sourceColumn: status
+
+	column FirstContactResolved
+		dataType: boolean
+		sourceColumn: first_contact_resolved
+
+	column IsEscalated
+		dataType: boolean
+		sourceColumn: is_escalated
+
+	column HandleTimeMin
+		dataType: double
+		sourceColumn: handle_time_min
+
+	column CSAT
+		dataType: int64
+		sourceColumn: csat_score
+
+	column CreatedDate
+		dataType: dateTime
+		sourceColumn: created_date
+
+	column UpdatedAt
+		dataType: dateTime
+		sourceColumn: updated_at
+
+	partition Cases = m
+		mode: import
+		source =
+				let
+				    Source = Databricks.Catalogs(Host, HttpPath),
+				    cases = Source{[Name="main"]}[Data]{[Name="customer_center"]}[Data]{[Name="cases"]}[Data]
+				in
+				    cases

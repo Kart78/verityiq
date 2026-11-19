@@ -1,0 +1,22 @@
+# SAMPLE CONFIGURATION ONLY - Cognos and Oracle adapters are PLANNED (Phase 2).
+id: sample-cognos-oracle
+name: Customer Center (Sample config) - Cognos + Oracle
+description: Configuration example; adapters not yet implemented.
+mode: LIVE
+sample: true
+bi:
+  platform: cognos
+  config: {url: "https://cognos.example.com/api/v1", namespace: LDAP, user: qa_svc, password: "${COGNOS_PASSWORD}", package: Customer Center}
+data:
+  platform: oracle
+  config: {dsn: "dbhost:1521/CCPDB", user: QA_RO, password: "${ORACLE_PASSWORD}"}
+kpi_file: config/kpis/customer_center_demo.yaml
+default_context: {label: Last 12 Months, relative_days: 365}
+mapping:
+  tables:
+    cases: {source: CC.SERVICE_CASES, model: "[Cases]", primary_key: CASE_ID}
+    customers: {source: CC.CUSTOMERS, model: "[Customers]", primary_key: CUSTOMER_ID}
+  joins: [{left: cases, right: customers, left_key: CUSTOMER_ID, right_key: CUSTOMER_ID}]
+  fields:
+    case_status: {table: cases, source: STATUS, model: "[Cases].[Status]"}
+    case_date: {table: cases, source: CREATED_AT, model: "[Cases].[Created At]", data_type: date}
