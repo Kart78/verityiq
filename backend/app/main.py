@@ -465,12 +465,17 @@ async def no_stale_ui(request, call_next):
     return resp
 
 
-app.mount("/static", StaticFiles(directory=FRONTEND), name="static")
+app.mount("/static", StaticFiles(directory=FRONTEND, check_dir=False), name="static")   # never fail start-up over the UI folder
 
 
 @app.get("/")
 def index():
+    if not (FRONTEND / "index.html").exists():
+        return Response(f"VerityIQ API is running, but the UI files were not found at {FRONTEND}.", status_code=500, media_type="text/plain")
     html = (FRONTEND / "index.html").read_text(encoding="utf-8")
-    v = str(int(max((FRONTEND / f).stat().st_mtime for f in ("app.js", "styles.css"))))
+    try:
+        v = str(int(max((FRONTEND / f).stat().st_mtime for f in ("app.js", "styles.css"))))
+    except OSError:
+        v = "1"
     html = html.replace("/static/app.js", f"/static/app.js?v={v}").replace("/static/styles.css", f"/static/styles.css?v={v}")
     return Response(html, media_type="text/html", headers={"Cache-Control": "no-cache, must-revalidate"})

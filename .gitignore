@@ -1,5 +1,5 @@
 # local data - never commit (database, uploaded projects, stored secrets)
-data/
+/data/
 *.db
 secrets.json
 *.cache.duckdb
