@@ -21,7 +21,10 @@ os.environ.setdefault("BIQA_PROJECTS", "/tmp/verityiq/projects")
 os.environ.setdefault("BIQA_SECRETS_FILE", "/tmp/verityiq/secrets.json")
 os.environ.setdefault("HOME", "/tmp")
 
-ROOT = Path(__file__).resolve().parent.parent
+# The project root is the folder holding backend/app: one level up locally (api/index.py), but Vercel may place this
+# file at the bundle root (/var/task/index.py) - so look in both places, and next to the working directory.
+_here = Path(__file__).resolve().parent
+ROOT = next((d for d in (_here.parent, _here, Path.cwd()) if (d / "backend" / "app" / "main.py").exists()), _here.parent)
 sys.path.insert(0, str(ROOT / "backend"))
 
 app = FastAPI()
