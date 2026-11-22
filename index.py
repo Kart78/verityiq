@@ -1,4 +1,4 @@
-"""Vercel entry point: serves the FastAPI app (UI + API) as one Python function.
+"""Vercel entry point (project root, so the whole project is bundled): serves the FastAPI app (UI + API) as one Python function.
 
 Vercel's filesystem is read-only except /tmp, so the database, uploaded projects and the secrets fallback file live
 there. /tmp is per-instance and temporary: projects and results are lost when the instance is recycled - use the
@@ -21,10 +21,9 @@ os.environ.setdefault("BIQA_PROJECTS", "/tmp/verityiq/projects")
 os.environ.setdefault("BIQA_SECRETS_FILE", "/tmp/verityiq/secrets.json")
 os.environ.setdefault("HOME", "/tmp")
 
-# The project root is the folder holding backend/app: one level up locally (api/index.py), but Vercel may place this
-# file at the bundle root (/var/task/index.py) - so look in both places, and next to the working directory.
+# This file sits at the project root (Vercel bundles the entry file's folder), next to backend/app.
 _here = Path(__file__).resolve().parent
-ROOT = next((d for d in (_here.parent, _here, Path.cwd()) if (d / "backend" / "app" / "main.py").exists()), _here.parent)
+ROOT = next((d for d in (_here, _here.parent, Path.cwd()) if (d / "backend" / "app" / "main.py").exists()), _here)
 sys.path.insert(0, str(ROOT / "backend"))
 
 app = FastAPI()
@@ -36,7 +35,7 @@ except Exception:  # pragma: no cover - only on a broken deployment
     _err = traceback.format_exc()
     print("VerityIQ failed to start:\n" + _err, file=sys.stderr, flush=True)
     try:
-        _present = sorted(p.name for p in ROOT.iterdir())
+        _present = sorted(str(p.relative_to(ROOT)) for p in ROOT.glob("*/*"))[:80]
     except OSError:
         _present = []
     _body = ("VerityIQ could not start on this deployment.\n\n" + _err +

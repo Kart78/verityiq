@@ -234,7 +234,7 @@ Unused measures are excluded from KPI scopes automatically. Tenant-wide scanning
 
 ## Deploying to Vercel
 
-The repo is ready for Vercel (`vercel.json`, `api/index.py`, lean dependencies in `pyproject.toml` / `api/requirements.txt`).
+The repo is ready for Vercel (`vercel.json`, `index.py`, lean dependencies in `pyproject.toml`).
 
 1. Import the GitHub repo in Vercel (Framework preset: **Other**) - or run `npx vercel --prod` in this folder.
 2. **Required:** add the environment variable `BIQA_BASIC_AUTH` = `user:a-strong-password` (Settings › Environment Variables) and redeploy. Without it the hosted app refuses to start, so it is never open to anyone with the link.
