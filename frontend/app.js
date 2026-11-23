@@ -174,8 +174,21 @@ function findingsHtml(m) {
 async function upload(path, form) {
   if (SNAP) { toast("Read-only snapshot. Run the app locally to upload."); throw new Error("snapshot"); }
   const r = await fetch(path, { method: "POST", body: form });
+  if (r.status === 413) throw new Error("Upload too large for the hosted app (about 4.5 MB per upload, after compression). " +
+    "Upload only the .SemanticModel and .Report folders, or use the local install.");
   if (!r.ok) { let t = await r.text(); try { t = JSON.parse(t).detail; } catch {} throw new Error(t); }
   return r.json();
+}
+// Many files (a PBIP folder: hundreds of TMDL/JSON text files) -> one gzip bundle, about 10x smaller, so a project fits
+// the hosted request limit. Format matches backend/app/core/bundle.py. Falls back to plain multipart if unsupported.
+async function packFiles(files, nameOf) {
+  const fd = new FormData();
+  if (typeof CompressionStream === "undefined") { files.forEach(f => fd.append("files", f, nameOf(f))); return fd; }
+  const manifest = JSON.stringify(files.map(f => ({p: nameOf(f), n: f.size}))) + "\n";
+  const raw = new Blob([manifest, ...files], {type: "application/octet-stream"});
+  const gz = await new Response(raw.stream().pipeThrough(new CompressionStream("gzip"))).blob();
+  fd.append("bundle", gz, "upload.bundle.gz");
+  return fd;
 }
 function download(path) {
   if (SNAP) { toast("Downloads are available in the local app."); return; }
@@ -284,7 +297,7 @@ PAGES.project = async () => {
     if (fl.length === 1 && /\.zip$/i.test(fl[0].name)) pick(fl, false); else toast("Drop a .zip, or use 'Choose PBIP folder' for a folder."); };
   $("#upBtn").onclick = async e => {
     const b = e.currentTarget; b.disabled = true; b.innerHTML = '<span class="spin"></span> Analyzing…';
-    const fd = new FormData(); files.forEach(f => fd.append("files", f, f.webkitRelativePath || f.name)); fd.append("name", $("#pName").value);
+    const fd = await packFiles(files, f => f.webkitRelativePath || f.name); fd.append("name", $("#pName").value);
     try { const s = await upload("/api/projects", fd); await afterProject(s.id); toast(`Project created: ${s.measures} measures, ${s.visuals} visuals`); location.hash = "#project"; }
     catch (x) { if (x.message !== "snapshot") toast(x.message); b.disabled = false; b.textContent = "Upload & analyze"; }
   };
@@ -764,7 +777,7 @@ PAGES.usage = async () => {
   const bindHead = () => {
     $("#uTabs").querySelectorAll("button").forEach(b => b.onclick = () => { tab = st.tab = b.dataset.tab; render(); });
     $("#uCsv").onclick = () => download(E("/usage.csv"));
-    $("#uRep").onchange = async e => { const fd = new FormData(); Array.from(e.target.files).forEach(f => fd.append("files", f, f.webkitRelativePath || f.name));
+    $("#uRep").onchange = async e => { const fd = await packFiles(Array.from(e.target.files), f => f.webkitRelativePath || f.name);
       try { u = await upload(E("/usage/reports"), fd); toast(`Added: ${u.added.join(", ")} - their fields now count as used`); render(); } catch (x) { if (x.message !== "snapshot") toast(x.message); } };
     $("#uVpax").onchange = async e => { const f = e.target.files[0]; if (!f) return; const fd = new FormData(); fd.append("file", f, f.name);
       try { u = await upload(E("/usage/vpax"), fd); toast("Model sizes loaded"); render(); } catch (x) { if (x.message !== "snapshot") toast(x.message); } };

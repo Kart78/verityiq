@@ -69,11 +69,21 @@ def platforms():
              "fields": [f.public() for f in SPECS[p.key].fields + COMMON_FIELDS] if p.key in SPECS else None} for p in PLATFORMS]
 
 
+async def _upload_payload(files, bundle) -> list[tuple[str, bytes]]:
+    """Files sent one by one (multipart) or packed into one gzip bundle by the browser (see core/bundle.py)."""
+    from .core.bundle import unpack
+    if bundle is not None:
+        return unpack(await bundle.read())
+    if not files:
+        raise ValueError("No files were uploaded")
+    return [(f.filename or "upload", await f.read()) for f in files]
+
+
 @app.post("/api/projects")
-async def create_project(files: list[UploadFile] = File(...), name: Optional[str] = Form(default=None),
-                         u: User = Depends(need("tester"))):
-    payload = [(f.filename or "upload", await f.read()) for f in files]
+async def create_project(files: Optional[list[UploadFile]] = File(default=None), bundle: Optional[UploadFile] = File(default=None),
+                         name: Optional[str] = Form(default=None), u: User = Depends(need("tester"))):
     try:
+        payload = await _upload_payload(files, bundle)
         return svc.create_project_from_files(payload, u.name, name=name or None)
     except (ValueError, FileNotFoundError) as e:
         raise HTTPException(400, str(e))
@@ -179,10 +189,11 @@ def usage_keep(env_id: str, body: dict, u: User = Depends(need("tester"))):
 
 
 @app.post("/api/environments/{env_id}/usage/reports")
-async def usage_reports(env_id: str, files: list[UploadFile] = File(...), u: User = Depends(need("tester"))):
+async def usage_reports(env_id: str, files: Optional[list[UploadFile]] = File(default=None),
+                        bundle: Optional[UploadFile] = File(default=None), u: User = Depends(need("tester"))):
     _env(env_id)
     try:
-        return svc.add_usage_reports(env_id, [(f.filename or "file", await f.read()) for f in files], u.name)
+        return svc.add_usage_reports(env_id, await _upload_payload(files, bundle), u.name)
     except ValueError as e:
         raise HTTPException(400, str(e))
 
